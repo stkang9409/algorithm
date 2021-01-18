@@ -1,50 +1,45 @@
 import sys
 from collections import deque
 
-input = sys.stdin.readline
-
-col_n, row_n, box_n = map(int, input().split())
-
-boxs = []
-for _ in range(box_n):
-    box = []
-    for _ in range(row_n):
-        row = list(map(int, input().split()))
-        box.append(row)
-    boxs.append(box)
+R, C, H = map(int, input().split())
+boxs = [[list(map(int, input().split())) for _ in range(C)]
+        for _ in range(H)]  # [H][C][R]
+visited = [[[0]*R for _ in range(C)] for _ in range(H)]
+cmd = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1), ]
 
 
 def solve():
-    visited = [[[0]*col_n for _ in range(row_n)] for _ in range(box_n)]
-    que = deque([])
-    cmd = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]
     result = 0
-    for a in range(len(boxs)):
-        for b in range(len(boxs[a])):
-            for c in range(len(boxs[a][b])):
-                if boxs[a][b][c] == 1:
-                    que.append((a, b, c, 0))
+    count = 0
+    q = deque()
+    # 0 찾기
+    for i in range(R):
+        for j in range(C):
+            for w in range(H):
+                if boxs[w][j][i] == 1:
+                    q.append((w, j, i))
+                elif boxs[w][j][i] == 0:
+                    count += 1
 
-    while que:
-        cur_a, cur_b, cur_c, cur_day = que.popleft()
-        boxs[cur_a][cur_b][cur_c] = 1
-        if visited[cur_a][cur_b][cur_c] == 0:
-            visited[cur_a][cur_b][cur_c] = 1
-            for l, f, u in cmd:
-                next_a, next_b, next_c = cur_a+l, cur_b+f, cur_c+u
-                next_day = cur_day + 1
-                if 0 <= next_a < box_n and 0 <= next_b < row_n and 0 <= next_c < col_n and boxs[next_a][next_b][next_c] == 0 and visited[next_a][next_b][next_c] == 0:
-                    que.append((next_a, next_b, next_c, next_day))
-                else:
-                    result = max(result, cur_day)
+    # 익은 토마토 주변 익히기
+    t = 0
+    while q and count != result:
+        for _ in range(len(q)):
+            cw, cj, ci = q.popleft()
+            for a, b, c in cmd:
+                nw, nj, ni = cw+a, cj+b, ci+c
+                if not(0 <= nw < H and 0 <= nj < C and 0 <= ni < R):
+                    continue
+                if boxs[nw][nj][ni] == 0:
+                    result += 1
+                    boxs[nw][nj][ni] = 1
+                    q.append((nw, nj, ni))
+        t += 1
 
-    for a in range(len(boxs)):
-        for b in range(len(boxs[a])):
-            for c in range(len(boxs[a][b])):
-                if boxs[a][b][c] == 0:
-                    return -1
-
-    return result
+    if count == result:
+        return t
+    else:
+        return -1
 
 
 print(solve())

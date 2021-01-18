@@ -1,37 +1,33 @@
-N = int(input())
-M = int(input())
+import sys
 
-need_num = [[] for _ in range(N+1)]
-need_cnt = [[] for _ in range(N+1)]
-ans_cnt = [0] * (N)
-funda = []
 
-for i in range(M):
-    x, y, k = map(int, input().split())
-    need_num[x].append(y)
-    need_cnt[x].append(k)
+def solve():
+    n = int(sys.stdin.readline().strip())
+    m = int(sys.stdin.readline().strip())
 
-# 기본 부품 번호
-for idx, item in enumerate(need_num):
-    if idx != 0 and len(item) == 0:
-        funda.append(idx)
+    link = [[] for _ in range(n + 1)]
+    inDegree = [0] * (n + 1)
+    parts = [0] * (n + 1)
 
-ans_cnt = [0]*(N+1)
-for i in range(len(need_num[N])):
-    ans_cnt[need_num[N][i]] += need_cnt[N][i]
+    for _ in range(m):
+        x, y, k = map(int, sys.stdin.readline().strip().split())
+        link[x].append((y, k))
+        inDegree[y] += 1
 
-while 1:
-    sumchk = 0
-    for i in funda:
-        sumchk += ans_cnt[i]
-    if sumchk == sum(ans_cnt):
-        break
+    stack = [n]
+    parts[n] = 1  # 부품 개수 저장
 
-    for i in range(1, N):
-        if ans_cnt[i] != 0 and i not in funda:
-            for j in range(len(need_num[i])):
-                ans_cnt[need_num[i][j]] += (ans_cnt[i]*need_cnt[i][j])
-            ans_cnt[i] = 0
+    while stack:
+        now = stack.pop()
+        for num, cnt in link[now]:
+            parts[num] += parts[now] * cnt
+            inDegree[num] -= 1
+            if inDegree[num] == 0:
+                stack.append(num)
 
-for i in funda:
-    print(i, ans_cnt[i])
+    for i in range(1, n + 1):
+        if not link[i]:
+            print(i, parts[i])
+
+
+solve()

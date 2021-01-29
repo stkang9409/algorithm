@@ -13,3 +13,11 @@ def solve(N, M):
     visited = [[0]*M for _ in range(N)]
     while que:
         i, j, value = que.popleft()
+        if i == N-1 and j == M-1:
+            return value
+        if visited[i][j] == 0:
+            visited[i][j] = 1
+            for a, b in cmd:
+                ni = i + a
+                nj = j+b
+                if not(0 <= ni < N and 0 <=)
